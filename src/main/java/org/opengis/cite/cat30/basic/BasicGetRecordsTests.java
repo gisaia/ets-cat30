@@ -335,9 +335,13 @@ public class BasicGetRecordsTests extends CommonFixture {
                 new DOMSource(entity, entity.getDocumentURI()));
         Element results = (Element) entity.getElementsByTagNameNS(
                 Namespaces.CSW, CAT3.SEARCH_RESULTS).item(0);
+        Map<String, String> namespaceBindings = new HashMap<>();
+        namespaceBindings.put(Namespaces.DCMES,"dc");
+        namespaceBindings.put(Namespaces.CSW,"csw");
+        namespaceBindings.put(Namespaces.OWS,"ows");
         ETSAssert.assertXPath(
-                "not(csw:SummaryRecord[dc:type or dc:subject or dc:format or ows:BoundingBox])",
-                results, null);
+                "not(csw:SummaryRecord[dc:type or subject or dc:format or ows:BoundingBox])",
+                results, namespaceBindings);
     }
 
     /**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" 
      xmlns:os="http://a9.com/-/spec/opensearch/1.1/" 
-     xmlns:georss="http://www.georss.org/georss/10">
+     xmlns:georss="http://www.georss.org/georss">
     <channel>
         <title>Earthquakes</title>
         <link>http://liftoff.msfc.nasa.gov/</link>

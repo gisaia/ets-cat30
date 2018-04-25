@@ -1,6 +1,7 @@
 package org.opengis.cite.cat30.basic;
 
 import com.sun.jersey.api.client.ClientResponse;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.validation.Validator;
+
 import org.opengis.cite.cat30.CAT3;
 import org.opengis.cite.cat30.CommonFixture;
 import org.opengis.cite.cat30.ETSAssert;
@@ -39,7 +41,7 @@ import org.xml.sax.SAXException;
  * Provides tests that apply to the <code>GetRecordById</code> request. This
  * request implements the abstract <em>GetResourceByID</em> operation defined in
  * the OGCWebService interface (OGC 06-121r9, Figure C.2).
- *
+ * <p>
  * <p>
  * The KVP syntax must be supported; this encoding is generally used with the
  * GET method but may also be used with the POST method; this latter capability
@@ -47,9 +49,9 @@ import org.xml.sax.SAXException;
  * as indicated below. The media type of a KVP request entity is
  * "application/x-www-form-urlencoded".
  * </p>
- *
+ * <p>
  * <pre>{@literal
- *<Post xmlns="http://www.opengis.net/ows/2.0"
+ * <Post xmlns="http://www.opengis.net/ows/2.0"
  *  xmlns:xlink="http://www.w3.org/1999/xlink"
  *  xlink:href="http://cat.example.org/csw">
  *  <Constraint name="PostEncoding">
@@ -57,10 +59,10 @@ import org.xml.sax.SAXException;
  *      <Value>KVP</Value>
  *    </AllowedValues>
  *  </Constraint>
- *</Post>
- *}
+ * </Post>
+ * }
  * </pre>
- *
+ * <p>
  * <p style="margin-bottom: 0.5em"><strong>Sources</strong></p>
  * <ul>
  * <li>OGC 12-176r6, 7.4: GetRecordById operation</li>
@@ -171,7 +173,11 @@ public class GetRecordByIdTests extends CommonFixture {
         Document entity = ClientUtils.getResponseEntityAsDocument(response, null);
         String expr = String.format("/csw:SummaryRecord/dc:identifier = '%s'",
                 id);
-        ETSAssert.assertXPath(expr, entity, null);
+        Map<String, String> namespaceBindings = new HashMap<>();
+        namespaceBindings.put(Namespaces.DCMES, "dc");
+        namespaceBindings.put(Namespaces.CSW, "csw");
+        namespaceBindings.put(Namespaces.OWS, "ows");
+        ETSAssert.assertXPath(expr, entity, namespaceBindings);
     }
 
     /**
@@ -200,7 +206,11 @@ public class GetRecordByIdTests extends CommonFixture {
         Document entity = ClientUtils.getResponseEntityAsDocument(response, null);
         String expr = String.format("/csw:BriefRecord/dc:identifier = '%s'",
                 id);
-        ETSAssert.assertXPath(expr, entity, null);
+        Map<String, String> namespaceBindings = new HashMap<>();
+        namespaceBindings.put(Namespaces.DCMES, "dc");
+        namespaceBindings.put(Namespaces.CSW, "csw");
+        namespaceBindings.put(Namespaces.OWS, "ows");
+        ETSAssert.assertXPath(expr, entity, namespaceBindings);
         Validator validator = this.cswSchema.newValidator();
         ETSAssert.assertSchemaValid(validator, new DOMSource(entity));
     }
@@ -231,7 +241,11 @@ public class GetRecordByIdTests extends CommonFixture {
         Document entity = ClientUtils.getResponseEntityAsDocument(response, null);
         String expr = String.format("/csw:Record/dc:identifier = '%s'",
                 id);
-        ETSAssert.assertXPath(expr, entity, null);
+        Map<String, String> namespaceBindings = new HashMap<>();
+        namespaceBindings.put(Namespaces.DCMES, "dc");
+        namespaceBindings.put(Namespaces.CSW, "csw");
+        namespaceBindings.put(Namespaces.OWS, "ows");
+        ETSAssert.assertXPath(expr, entity, namespaceBindings);
         Validator validator = this.cswSchema.newValidator();
         ETSAssert.assertSchemaValid(validator, new DOMSource(entity));
     }
@@ -242,23 +256,23 @@ public class GetRecordByIdTests extends CommonFixture {
      * <code>Accept</code> request header indicates a preference for Atom
      * content; the outputFormat parameter is omitted (thus the header value
      * applies). The content of the entry must conform to RFC 4287.
-     *
+     * <p>
      * <p>
      * The atom:entry element is expected to include a dc:identifier element in
      * accord with the mappings given in OGC 10-032r8, Table 7.
      * </p>
-     *
+     * <p>
      * <pre>{@literal
-     *<entry xmlns="http://www.w3.org/2005/Atom"
+     * <entry xmlns="http://www.w3.org/2005/Atom"
      *  xmlns:dc="http://purl.org/dc/elements/1.1/">
      *  <id>http://csw.example.org/record/ff711198-b30f-11e4-a71e-12e3f512a338</id>
      *  <title>Title</title>
      *  <updated>2015-02-12T23:46:57Z</updated>
      *  <dc:identifier>ff711198-b30f-11e4-a71e-12e3f512a338</dc:identifier>
-     *</entry>
-     *}
+     * </entry>
+     * }
      * </pre>
-     *
+     * <p>
      * <p style="margin-bottom: 0.5em"><strong>Sources</strong></p>
      * <ul>
      * <li>OGC 12-176r6, 7.4.4.4: outputSchema parameter</li>
@@ -283,7 +297,11 @@ public class GetRecordByIdTests extends CommonFixture {
                 ClientResponse.Status.OK.getStatusCode(),
                 ErrorMessage.get(ErrorMessageKeys.UNEXPECTED_STATUS));
         Document entity = getResponseEntityAsDocument(response, null);
-        Map<String, String> nsBindings = Collections.singletonMap(Namespaces.ATOM, "atom");
+        Map<String, String> nsBindings = new HashMap<>();
+        nsBindings.put(Namespaces.ATOM, "atom");
+        nsBindings.put(Namespaces.DCMES, "dc");
+        nsBindings.put(Namespaces.CSW, "csw");
+        nsBindings.put(Namespaces.OWS, "ows");
         String expr = String.format("/atom:entry/dc:identifier = '%s'",
                 id);
         ETSAssert.assertXPath(expr, entity, nsBindings);
@@ -326,7 +344,11 @@ public class GetRecordByIdTests extends CommonFixture {
                 ClientResponse.Status.OK.getStatusCode(),
                 ErrorMessage.get(ErrorMessageKeys.UNEXPECTED_STATUS));
         Document entity = ClientUtils.getResponseEntityAsDocument(response, null);
-        Map<String, String> nsBindings = Collections.singletonMap(Namespaces.ATOM, "atom");
+        Map<String, String> nsBindings = new HashMap<>();
+        nsBindings.put(Namespaces.ATOM, "atom");
+        nsBindings.put(Namespaces.DCMES, "dc");
+        nsBindings.put(Namespaces.CSW, "csw");
+        nsBindings.put(Namespaces.OWS, "ows");
         String expr = String.format("/atom:entry/dc:identifier = '%s'",
                 id);
         ETSAssert.assertXPath(expr, entity, nsBindings);

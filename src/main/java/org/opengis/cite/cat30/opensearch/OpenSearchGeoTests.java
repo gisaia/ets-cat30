@@ -1,34 +1,11 @@
 package org.opengis.cite.cat30.opensearch;
 
 import com.sun.jersey.api.client.ClientResponse;
-import java.net.URI;
-import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
-import javax.ws.rs.core.MediaType;
-import javax.xml.XMLConstants;
-import javax.xml.namespace.QName;
-import javax.xml.transform.Source;
-import javax.xml.transform.dom.DOMSource;
 import org.geotoolkit.geometry.Envelopes;
 import org.geotoolkit.geometry.GeneralEnvelope;
 import org.geotoolkit.referencing.crs.DefaultGeographicCRS;
-import org.opengis.cite.cat30.CAT3;
-import org.opengis.cite.cat30.CommonFixture;
-import org.opengis.cite.cat30.ETSAssert;
-import org.opengis.cite.cat30.ErrorMessage;
-import org.opengis.cite.cat30.ErrorMessageKeys;
-import org.opengis.cite.cat30.Namespaces;
-import org.opengis.cite.cat30.SuiteAttribute;
-import org.opengis.cite.cat30.util.ClientUtils;
-import org.opengis.cite.cat30.util.DatasetInfo;
-import org.opengis.cite.cat30.util.OpenSearchTemplateUtils;
-import org.opengis.cite.cat30.util.ServiceMetadataUtils;
-import org.opengis.cite.cat30.util.URIUtils;
+import org.opengis.cite.cat30.*;
+import org.opengis.cite.cat30.util.*;
 import org.opengis.cite.geomatics.Extents;
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.operation.TransformException;
@@ -41,12 +18,26 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import javax.ws.rs.core.MediaType;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
+import javax.xml.transform.Source;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.xpath.XPathExpressionException;
+import java.net.URI;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * Verifies behavior of the SUT when processing OpenSearch requests that contain
  * geographic extensions defined in <em>OGC OpenSearch Geo and Time
  * Extensions</em> (OGC 10-032r8). The relevant namespace URI is
  * <code>http://a9.com/-/opensearch/extensions/geo/1.0/</code>.
- *
+ * <p>
  * <p>
  * All implementations must satisfy the requirements of the
  * <strong>Core</strong> conformance class (see OGC 10-032r8, Table 1). A
@@ -56,7 +47,7 @@ import org.w3c.dom.Node;
  * <li>define a URL template for the Atom response type;</li>
  * <li>implement a bounding box search (<code>geo:box</code>).</li>
  * </ul>
- *
+ * <p>
  * <p>
  * In an Atom feed or entry, a bounding box is represented using a GeoRSS
  * element. Either the simple or GML variant is acceptable:</p>
@@ -65,7 +56,7 @@ import org.w3c.dom.Node;
  * <li><code>georss:where/{http://www.opengis.net/gml}Envelope</code> (any
  * CRS)</li>
  * </ul>
- *
+ * <p>
  * <p>
  * In addition to the service capabilities listed above, a Catalog v3 service
  * must also implement the <strong>Get record by id</strong> conformance class
@@ -73,7 +64,7 @@ import org.w3c.dom.Node;
  * (<code>geo:uid</code>). This requirement is a consequence of applying the
  * <code>Filter-FES-KVP</code> conformance class to OpenSearch queries (see
  * Table 1).</p>
- *
+ * <p>
  * <p style="margin-bottom: 0.5em"><strong>Sources</strong></p>
  * <ul>
  * <li><a href="https://portal.opengeospatial.org/files/?artifact_id=56866&version=2"
@@ -163,7 +154,7 @@ public class OpenSearchGeoTests extends CommonFixture {
      * Normal response XML encoding"
      */
     @Test(description = "OGC 12-176r6, Table 6")
-    public void getResourceById() {
+    public void getResourceById() throws XPathExpressionException {
         List<Node> uidTemplates = OpenSearchTemplateUtils.filterURLTemplatesByParam(
                 this.urlTemplates, UID_PARAM);
         Assert.assertFalse(uidTemplates.isEmpty(),
@@ -189,8 +180,10 @@ public class OpenSearchGeoTests extends CommonFixture {
             String recordPath = "atom:feed/atom:entry";
             String expr = String.format("/%s/dc:identifier = '%s'",
                     recordPath, id);
-            ETSAssert.assertXPath(expr, entity,
-                    Collections.singletonMap(Namespaces.ATOM, "atom"));
+            Map<String, String> namespaceBindings = new HashMap<>();
+            namespaceBindings.put(Namespaces.DCMES, "dc");
+            namespaceBindings.put(Namespaces.ATOM, "atom");
+            ETSAssert.assertXPath(expr, entity,namespaceBindings);
             Source source = ClientUtils.getResponseEntityAsSource(response, null);
             URL schemaUrl = getClass().getResource(SCHEMATRON_ATOM);
             ETSAssert.assertSchematronValid(schemaUrl, source);
@@ -233,7 +226,7 @@ public class OpenSearchGeoTests extends CommonFixture {
      * constructed in accord with a URL template containing the
      * <code>{geo:box}</code> parameter. Any other template parameters are set
      * to their default values.
-     *
+     * <p>
      * <p>
      * All matching record representations in the response entity must satisfy
      * the bounding box constraint. If the entity is an Atom feed, it must also

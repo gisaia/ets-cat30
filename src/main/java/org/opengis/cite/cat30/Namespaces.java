@@ -68,7 +68,7 @@ public class Namespaces {
     /**
      * <a href="http://www.georss.org/" target="_blank">GeoRSS</a> namespace.
      */
-    public static final String GEORSS = "http://www.georss.org/georss/10";
+    public static final String GEORSS = "http://www.georss.org/georss";
     /**
      * W3C XML Schema namespace
      */

@@ -470,8 +470,7 @@ public class BasicSearchTests extends CommonFixture {
 		qryParams.put(CAT3.ELEMENT_SET, CAT3.ELEMENT_SET_SUMMARY);
 		QName titleName = new QName(Namespaces.DCMES, "title");
 		QName subjectName = new QName(Namespaces.DCMES, "subject");
-		String searchTerms = Records.findMatchingSearchTerms(
-				this.datasetInfo.getDataFile(), titleName, subjectName);
+		String searchTerms = Records.findMatchingSearchTerms(this.datasetInfo.getDataFile(), titleName, subjectName);
 		qryParams.put(CAT3.Q, URIUtils.getPercentEncodedString(searchTerms));
 		request = ClientUtils.buildGetRequest(this.getURI, qryParams,
 				MediaType.APPLICATION_XML_TYPE);
@@ -481,10 +480,8 @@ public class BasicSearchTests extends CommonFixture {
 				ErrorMessage.get(ErrorMessageKeys.UNEXPECTED_STATUS));
 		Document entity = getResponseEntityAsDocument(response, null);
 		QName recordName = new QName(Namespaces.CSW, "SummaryRecord");
-		NodeList recordList = entity.getElementsByTagNameNS(
-				recordName.getNamespaceURI(), recordName.getLocalPart());
-		Assert.assertTrue(recordList.getLength() > 0, ErrorMessage.format(
-				ErrorMessageKeys.EMPTY_RESULT_SET, recordName));
+		NodeList recordList = entity.getElementsByTagNameNS(recordName.getNamespaceURI(), recordName.getLocalPart());
+		Assert.assertTrue(recordList.getLength() > 0, ErrorMessage.format(ErrorMessageKeys.EMPTY_RESULT_SET, recordName));
 		// NOTE: Spec does not indicate how multiple terms are interpreted or
 		// how records are matched
 		// ETSAssert.assertAllTermsOccur(recordList, searchTerms.split("\\s+"));
